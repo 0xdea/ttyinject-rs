@@ -23,6 +23,7 @@ exclude = [
 
 [dependencies]
 anyhow = "1.0"
+libc = "0.2"
 
 # [build-dependencies]
 

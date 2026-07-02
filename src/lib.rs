@@ -22,9 +22,13 @@
 // Structs, enums, impls blocks, impl blocks with constraints, trait impl blocks (std, ext, int)
 // Associated constants, associated functions, constructors, getters/setters, anything else.
 
+use libc::{STDIN_FILENO, TIOCSTI, ioctl};
+
 /// Dispatches to function implementing the selected action.
 pub fn run() -> anyhow::Result<()> {
-    todo!();
+    unsafe { ioctl(STDIN_FILENO, TIOCSTI, "X".as_ptr() as *const libc::c_char) };
+    std::thread::sleep(std::time::Duration::from_secs(2));
+    Ok(())
     /*
     match action {
         "action1" => func1()?,

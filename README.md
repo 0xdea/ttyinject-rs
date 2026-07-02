@@ -11,6 +11,9 @@
 >
 > -- Charles Stross, Accelerando
 
+> [!WARNING]
+> Work in progress, do not use!
+
 A port of [@hackerschoice](https://github.com/hackerschoice)'s [ttyinject](https://github.com/hackerschoice/ttyinject) to Rust, created as an exercise to learn the [nix](https://crates.io/crates/nix) crate. This simple tool abuses the `TIOCSTI` ioctl to inject keystrokes into a terminal exploiting a longstanding bug (feature?) in the Linux kernel.
 
 ![](https://raw.githubusercontent.com/0xdea/ttyinject-rs/master/.img/bug_vs_feature.jpg)
