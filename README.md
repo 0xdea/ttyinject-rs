@@ -11,7 +11,7 @@
 >
 > -- Charles Stross, Accelerando
 
-A port of @hackerschoice's [ttyinject](https://github.com/hackerschoice/ttyinject) to Rust, created as an exercise to learn the [nix](https://crates.io/crates/nix) crate. This simple tool abuses the `TIOCSTI` ioctl to inject keystrokes into a terminal exploiting a longstanding bug (feature?) in the Linux kernel.
+A port of [@hackerschoice](https://github.com/hackerschoice)'s [ttyinject](https://github.com/hackerschoice/ttyinject) to Rust, created as an exercise to learn the [nix](https://crates.io/crates/nix) crate. This simple tool abuses the `TIOCSTI` ioctl to inject keystrokes into a terminal exploiting a longstanding bug (feature?) in the Linux kernel.
 
 ![](https://raw.githubusercontent.com/0xdea/ttyinject-rs/master/.img/bug_vs_feature.jpg)
 
@@ -21,7 +21,7 @@ A port of @hackerschoice's [ttyinject](https://github.com/hackerschoice/ttyinjec
 
 ## How it works
 
-Taken verbatim from @hackerschoice's [ttyinject](https://github.com/hackerschoice/ttyinject):
+Taken verbatim from [ttyinject](https://github.com/hackerschoice/ttyinject)'s README:
 
 - `su` does not allocate a new TTY when switching to a non-privileged user.
 - The non-privileged user can then use `ioctl(0, TIOCSTI, ...)` to inject input into the root's shell prompt.
@@ -75,7 +75,7 @@ Tested on Ubuntu Linux 24.04.4 LTS (6.17.0-35-generic #35~24.04.1-Ubuntu kernel)
 
 ## Credits
 
-- @hackerschoice for their <https://github.com/hackerschoice/ttyinject>
+- [@hackerschoice](https://github.com/hackerschoice) for their <https://github.com/hackerschoice/ttyinject>
 
 ## Changelog
 
