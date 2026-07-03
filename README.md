@@ -14,7 +14,7 @@
 > [!CAUTION]
 > Non-functional work in progress, do not use!
 
-A port of [@hackerschoice](https://github.com/hackerschoice)'s [ttyinject](https://github.com/hackerschoice/ttyinject) to Rust, created as an exercise to learn the [nix](https://crates.io/crates/nix) crate. This simple tool abuses the `TIOCSTI` ioctl to inject keystrokes into a terminal exploiting a longstanding bug (feature?) in the Linux kernel.
+A port of [@hackerschoice](https://github.com/hackerschoice)'s [ttyinject](https://github.com/hackerschoice/ttyinject) to Rust, created as a learning exercise. This simple tool abuses the `TIOCSTI` ioctl to inject keystrokes into a terminal exploiting a longstanding bug (feature?) in the Linux kernel.
 
 ![](https://raw.githubusercontent.com/0xdea/ttyinject-rs/master/.img/bug_vs_feature.jpg)
 
@@ -26,7 +26,7 @@ Non-privileged user gets root privileges on Linux when root does `su - user`.
 
 Taken verbatim from [ttyinject](https://github.com/hackerschoice/ttyinject)'s README:
 
-- `su` does not allocate a new TTY when switching to a non-privileged user.
+- `su` does not allocate a new tty when switching to a non-privileged user.
 - The non-privileged user can therefore use `ioctl(0, TIOCSTI, ...)` to inject input into the root's shell prompt.
 - The injected input copies `/bin/sh` to `/var/tmp/.socket` and `chmod +s` it.
 - Executes only once (from Alice's `~/.bashrc`). Deletes itself afterwards.
