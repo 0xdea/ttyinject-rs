@@ -60,7 +60,7 @@ Then, wait for root to execute `su - user` and thereafter gain root privileges w
 
 ## Compatibility
 
-Tested on Ubuntu Linux 24.04.4 LTS (6.17.0-35-generic #35~24.04.1-Ubuntu kernel) `dev.tty.legacy_tiocsti` explicitly enabled.
+Tested on Ubuntu Linux 24.04.4 LTS (6.17.0-35-generic #35~24.04.1-Ubuntu kernel) with `dev.tty.legacy_tiocsti` explicitly enabled.
 
 > [!IMPORTANT]
 > Since Linux 6.2, `TIOCSTI` may require the `CAP_SYS_ADMIN` capability (if the `dev.tty.legacy_tiocsti` sysctl variable is set to `false`).
