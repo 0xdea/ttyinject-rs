@@ -3,10 +3,10 @@
 #![cfg_attr(doc, doc = include_str!("../README.md"))]
 #![doc(html_logo_url = "https://raw.githubusercontent.com/0xdea/ttyinject-rs/master/.img/logo.png")]
 
-use std::io;
+use std::io::{self, IsTerminal as _};
 
 use anyhow::Context as _;
-use libc::{STDIN_FILENO, TIOCSTI, c_int, getuid, ioctl, isatty, ttyname_r};
+use libc::{STDIN_FILENO, TIOCSTI, c_int, getuid, ioctl, ttyname_r};
 
 /// First part of the payload to inject into the tty's input buffer.
 const START: &[u8] = b"start\n";
@@ -26,8 +26,7 @@ pub fn run() -> anyhow::Result<()> {
     if uid == 0 {
         anyhow::bail!("we are already root");
     }
-    // SAFETY: isatty() is safe to call
-    if unsafe { isatty(STDIN_FILENO) == 0 } {
+    if !io::stdin().is_terminal() {
         anyhow::bail!("stdin does not refer to a terminal");
     }
 
