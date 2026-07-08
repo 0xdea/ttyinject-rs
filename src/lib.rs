@@ -37,7 +37,8 @@ pub fn run() -> anyhow::Result<()> {
     }
 
     let mut path_buf = [0_u8; 64];
-    // SAFETY: `slave` is a valid, open pty fd from `openpty` above; `path_buf` is a live,
+    // SAFETY: `STDIN_FILENO` is a valid fd argument regardless of what it refers to (an invalid
+    // or wrong-type fd just makes `ttyname_r` return an error, not UB); `path_buf` is a live,
     // writable buffer whose length is passed accurately, which is large enough for any
     // `/dev/pts/N` path.
     let ttyname_ret =
@@ -81,9 +82,9 @@ pub fn run() -> anyhow::Result<()> {
 ///
 /// TODO.
 pub fn tiocsti_inject(fd: c_int, byte: u8) -> io::Result<()> {
-    // SAFETY: `fd` is assumed by the caller to be a valid, open file descriptor referring to a tty (per this
-    // function's safety contract); `&byte` is a valid pointer to a live, properly initialized `u8` for the duration of
-    // the call, matching the single-`c_char` argument that `TIOCSTI` expects.
+    // SAFETY: `&raw const byte` is a valid pointer to a live, properly initialized `u8` for the duration of the call,
+    // matching the single-`c_char` argument that `TIOCSTI` expects; `fd` need not refer to a tty for this call to be
+    // sound; an invalid or wrong-type fd simply makes the ioctl fail (`EBADF`/`ENOTTY`) rather than causing UB.
     let ret = unsafe { ioctl(fd, TIOCSTI, &raw const byte) };
     if ret < 0 {
         return Err(io::Error::last_os_error());
