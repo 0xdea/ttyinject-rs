@@ -87,6 +87,9 @@ pub fn run() -> anyhow::Result<()> {
 
     // TODO: move initial checks to an external function?
 
+    // TODO: clear the termina
+    // TODO: implement some unit (and maybe integration) tests, excluding tests that don't work in ci
+
     // No need to SIGCONT here because `fg` in the payload does that for us.
     Ok(())
 }
