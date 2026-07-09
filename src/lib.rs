@@ -3,10 +3,15 @@
 #![cfg_attr(doc, doc = include_str!("../README.md"))]
 #![doc(html_logo_url = "https://raw.githubusercontent.com/0xdea/ttyinject-rs/master/.img/logo.png")]
 
+#[cfg(not(target_os = "linux"))]
+compile_error!("ttyinject-rs only supports Linux (it relies on the TIOCSTI ioctl)");
+
+use std::fs;
 use std::io::{self, IsTerminal as _};
+use std::os::unix::fs::MetadataExt as _;
 
 use anyhow::Context as _;
-use libc::{STDIN_FILENO, TIOCSTI, c_int, getuid, ioctl, ttyname_r};
+use libc::{STDIN_FILENO, TIOCSTI, c_int, getuid, ioctl};
 
 /// First part of the payload to inject into the tty's input buffer.
 const START: &[u8] = b"start\n";
@@ -26,6 +31,7 @@ pub fn run() -> anyhow::Result<()> {
     if uid == 0 {
         anyhow::bail!("we are already root");
     }
+
     if !io::stdin().is_terminal() {
         anyhow::bail!("stdin does not refer to a terminal");
     }
@@ -36,22 +42,13 @@ pub fn run() -> anyhow::Result<()> {
         anyhow::bail!("invalid parent process id");
     }
 
-    let mut path_buf = [0_u8; 64];
-    // SAFETY: `STDIN_FILENO` is a valid fd argument regardless of what it refers to (an invalid
-    // or wrong-type fd just makes `ttyname_r` return an error, not UB); `path_buf` is a live,
-    // writable buffer whose length is passed accurately, which is large enough for any
-    // `/dev/pts/N` path.
-    let ttyname_ret =
-        unsafe { ttyname_r(STDIN_FILENO, path_buf.as_mut_ptr().cast(), path_buf.len()) };
-    if ttyname_ret != 0 {
-        anyhow::bail!(
-            "ttyname_r failed: {}",
-            io::Error::from_raw_os_error(ttyname_ret)
-        );
-    }
+    let tty_path = fs::read_link(format!("/proc/self/fd/{STDIN_FILENO}"))
+        .context("failed to resolve tty path")?;
 
-    // TODO: stat + uid check
-    // TODO: use rust-native functions instead of unsafe libc calls where possible
+    let tty_metadata = fs::metadata(&tty_path).context("failed to stat tty")?;
+    if tty_metadata.uid() == uid {
+        anyhow::bail!("tty has the same uid as us");
+    }
 
     for &b in START {
         tiocsti_inject(STDIN_FILENO, b).context("failed to inject into tty")?;
@@ -62,6 +59,8 @@ pub fn run() -> anyhow::Result<()> {
     for &b in END {
         tiocsti_inject(STDIN_FILENO, b).context("failed to inject into tty")?;
     }
+
+    // TODO: move initial checks to an external function?
 
     // tiocsti_inject(STDIN_FILENO, b'X').context("failed to inject into tty")?;
     // thread::sleep(time::Duration::from_secs(2));
