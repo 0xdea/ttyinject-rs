@@ -6,9 +6,9 @@
 #[cfg(not(target_os = "linux"))]
 compile_error!("ttyinject-rs only supports Linux (it relies on the TIOCSTI ioctl)");
 
-use std::fs;
 use std::io::{self, IsTerminal as _};
 use std::os::unix::fs::MetadataExt as _;
+use std::{env, fs};
 
 use anyhow::Context as _;
 use libc::{STDIN_FILENO, TIOCSTI, c_int, getuid, ioctl};
@@ -52,6 +52,13 @@ pub fn run() -> anyhow::Result<()> {
     if tty_metadata.uid() == uid {
         anyhow::bail!("tty has the same uid as us");
     }
+
+    // TODO: Only execute once: delete our own executable.
+    // let exe_path = env::current_exe().context("failed to resolve own executable path")?;
+    // fs::remove_file(&exe_path).context("failed to delete own executable")?;
+
+    // Check that injection works.
+    tiocsti_inject(STDIN_FILENO, b' ').context("failed to inject into tty")?;
 
     // Inject the payload into the tty.
     for &b in START {
