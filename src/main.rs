@@ -11,15 +11,24 @@ const VERSION: &str = env!("CARGO_PKG_VERSION");
 const AUTHORS: &str = env!("CARGO_PKG_AUTHORS");
 
 fn main() -> ExitCode {
-    eprintln!("{PROGRAM} {VERSION} - Linux LPE via TIOCSTI tty injection");
-    eprintln!("Copyright (c) 2026 {AUTHORS}");
-    eprintln!();
+    // Handle verbose output with a macro.
+    let verbose = env::args_os().nth(1).is_some();
+    macro_rules! vprintln {
+        ($($arg:tt)*) => {
+            if verbose {
+                eprintln!($($arg)*);
+            }
+        };
+    }
 
-    // Let's do it.
+    vprintln!("{PROGRAM} {VERSION} - Linux LPE via TIOCSTI tty injection");
+    vprintln!("Copyright (c) 2026 {AUTHORS}");
+    vprintln!();
+
     match ttyinject_rs::run() {
         Ok(()) => ExitCode::SUCCESS,
         Err(err) => {
-            eprintln!("[!] Error: {err:#}");
+            vprintln!("[!] Error: {err:#}");
             ExitCode::FAILURE
         }
     }
