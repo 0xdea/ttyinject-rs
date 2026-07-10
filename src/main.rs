@@ -10,6 +10,9 @@ const VERSION: &str = env!("CARGO_PKG_VERSION");
 /// Package authors.
 const AUTHORS: &str = env!("CARGO_PKG_AUTHORS");
 
+/// Number of lines to clear from the terminal.
+const LINES: u16 = 4;
+
 fn main() -> ExitCode {
     // Handle verbose output with a macro.
     let verbose = env::args_os().nth(1).is_some();
@@ -26,7 +29,10 @@ fn main() -> ExitCode {
     vprintln!();
 
     match ttyinject_rs::run() {
-        Ok(()) => ExitCode::SUCCESS,
+        Ok(()) => {
+            ttyinject_rs::clear_terminal(LINES);
+            ExitCode::SUCCESS
+        }
         Err(err) => {
             vprintln!("[!] Error: {err:#}");
             ExitCode::FAILURE
