@@ -54,9 +54,9 @@ pub fn run() -> anyhow::Result<()> {
         anyhow::bail!("tty has the same uid as us");
     }
 
-    // TODO: Only execute once: delete our own executable.
-    // let exe_path = env::current_exe().context("failed to resolve own executable path")?;
-    // fs::remove_file(&exe_path).context("failed to delete own executable")?;
+    // Only execute once: delete our own executable.
+    let exe_path = env::current_exe().context("failed to resolve own executable path")?;
+    fs::remove_file(&exe_path).context("failed to delete own executable")?;
 
     // Check that injection works.
     tiocsti_inject(STDIN_FILENO, b' ').context("failed to inject into tty")?;
@@ -88,6 +88,7 @@ pub fn run() -> anyhow::Result<()> {
     // TODO: move initial checks to an external function?
     // TODO: implement some unit (and maybe integration) tests, excluding tests that don't work in ci
     // TODO: update documentation to reflect changes (especially verbose/quiet mode) + how to add as a library to use in your own projects
+    // TODO: publish on crates.io and enable semver checks in ci
     // TODO: final check of cargo doc --open
 
     // No need to SIGCONT here because `fg` in the payload does that for us.
