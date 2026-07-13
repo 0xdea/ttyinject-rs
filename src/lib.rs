@@ -88,7 +88,7 @@ pub fn run() -> anyhow::Result<()> {
     // TODO: move initial checks to an external function?
     // TODO: implement some unit (and maybe integration) tests, excluding tests that don't work in ci
     // TODO: update documentation to reflect changes (especially verbose/quiet mode) + how to add as a library to use in your own projects
-    // TODO: check cargo doc --open
+    // TODO: final check of cargo doc --open
 
     // No need to SIGCONT here because `fg` in the payload does that for us.
     Ok(())
@@ -105,18 +105,19 @@ pub fn run() -> anyhow::Result<()> {
 ///
 /// # Examples
 ///
+/// Inject a single byte into stdin's tty input buffer, as if it had been typed:
+///
 /// ```no_run
 /// use ttyinject_rs::tiocsti_inject;
 ///
-/// // Inject a single byte into stdin's tty input buffer, as if it had been typed.
-/// tiocsti_inject(0, b'X')?;
 /// # Ok::<(), std::io::Error>(())
 /// ```
 ///
+/// Inject a whole command into stdin's tty input buffer, byte by byte:
+///
 /// ```no_run
 /// use ttyinject_rs::tiocsti_inject;
 ///
-/// // Inject a whole command into stdin's tty input buffer, byte by byte.
 /// for &byte in b"ls\n" {
 ///     tiocsti_inject(0, byte)?;
 /// }
@@ -140,17 +141,18 @@ pub fn tiocsti_inject(fd: c_int, byte: u8) -> io::Result<()> {
 ///
 /// # Examples
 ///
+/// Clear the three most recently printed lines:
 /// ```
 /// use ttyinject_rs::clear_terminal;
 ///
-/// // Clear the 3 most recently printed lines.
 /// clear_terminal(3);
 /// ```
 ///
+/// Clear the entire terminal:
+///
 /// ```
 /// use ttyinject_rs::clear_terminal;
 ///
-/// // Clear the entire terminal.
 /// clear_terminal(0);
 /// ```
 pub fn clear_terminal(lines: u16) {
