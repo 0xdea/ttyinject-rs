@@ -104,7 +104,27 @@ pub fn run() -> anyhow::Result<()> {
 ///
 /// # Examples
 ///
-/// TODO.
+/// ```no_run
+/// use ttyinject_rs::tiocsti_inject;
+///
+/// // Inject a single byte into stdin's tty input buffer, as if it had been typed.
+/// tiocsti_inject(0, b'X')?;
+/// # Ok::<(), std::io::Error>(())
+/// ```
+///
+/// ```no_run
+/// use ttyinject_rs::tiocsti_inject;
+///
+/// // Inject a whole command into stdin's tty input buffer, byte by byte.
+/// for &byte in b"ls\n" {
+///     tiocsti_inject(0, byte)?;
+/// }
+/// # Ok::<(), std::io::Error>(())
+/// ```
+///
+/// These examples are marked `no_run` because `TIOCSTI` only succeeds against a tty that is the
+/// calling process's own controlling terminal (see [`tiocsti_inject`]'s requirements above), which
+/// doctests don't run under.
 pub fn tiocsti_inject(fd: c_int, byte: u8) -> io::Result<()> {
     // SAFETY: `&raw const byte` is a valid pointer to a live, properly initialized `u8` for the duration of the call,
     // matching the single-`c_char` argument that `TIOCSTI` expects; `fd` need not refer to a tty for this call to be
