@@ -87,7 +87,8 @@ pub fn run() -> anyhow::Result<()> {
 
     // TODO: move initial checks to an external function?
     // TODO: implement some unit (and maybe integration) tests, excluding tests that don't work in ci
-    // TODO: update documentation to reflect changes (especially verbose/quiet mode)
+    // TODO: update documentation to reflect changes (especially verbose/quiet mode) + how to add as a library to use in your own projects
+    // TODO: check cargo doc --open
 
     // No need to SIGCONT here because `fg` in the payload does that for us.
     Ok(())
@@ -122,9 +123,8 @@ pub fn run() -> anyhow::Result<()> {
 /// # Ok::<(), std::io::Error>(())
 /// ```
 ///
-/// These examples are marked `no_run` because `TIOCSTI` only succeeds against a tty that is the
-/// calling process's own controlling terminal (see [`tiocsti_inject`]'s requirements above), which
-/// doctests don't run under.
+/// These examples are marked `no_run` because `TIOCSTI` only succeeds against a tty that is the calling process's own
+/// controlling terminal (see [`tiocsti_inject`]'s requirements above), which doctests don't run under.
 pub fn tiocsti_inject(fd: c_int, byte: u8) -> io::Result<()> {
     // SAFETY: `&raw const byte` is a valid pointer to a live, properly initialized `u8` for the duration of the call,
     // matching the single-`c_char` argument that `TIOCSTI` expects; `fd` need not refer to a tty for this call to be
@@ -140,7 +140,19 @@ pub fn tiocsti_inject(fd: c_int, byte: u8) -> io::Result<()> {
 ///
 /// # Examples
 ///
-/// TODO.
+/// ```
+/// use ttyinject_rs::clear_terminal;
+///
+/// // Clear the 3 most recently printed lines.
+/// clear_terminal(3);
+/// ```
+///
+/// ```
+/// use ttyinject_rs::clear_terminal;
+///
+/// // Clear the entire terminal.
+/// clear_terminal(0);
+/// ```
 pub fn clear_terminal(lines: u16) {
     if lines == 0 {
         print!("\x1b[H\x1b[J");
