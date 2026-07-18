@@ -56,8 +56,12 @@ jobs:
           - armv7-unknown-linux-musleabi
           - armv7-unknown-linux-musleabihf
           - i586-unknown-linux-musl
-          - loongarch64-unknown-linux-musl
-          - riscv64gc-unknown-linux-musl
+          - mips-unknown-linux-musl
+          - mips64-unknown-linux-muslabi64
+          - mips64el-unknown-linux-muslabi64
+          - mipsel-unknown-linux-musl
+          # - loongarch64-unknown-linux-musl
+          # - riscv64gc-unknown-linux-musl
 
     steps:
       - name: checkout
