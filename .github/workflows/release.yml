@@ -51,10 +51,10 @@ jobs:
           - x86_64-unknown-linux-musl
           - aarch64-unknown-linux-musl
           - arm-unknown-linux-musleabi
-          - arm-unknown-linux-musleabihf
+          # - arm-unknown-linux-musleabihf
           - armv5te-unknown-linux-musleabi
           - armv7-unknown-linux-musleabi
-          - armv7-unknown-linux-musleabihf
+          # - armv7-unknown-linux-musleabihf
           - i586-unknown-linux-musl
           # - loongarch64-unknown-linux-musl
           # - riscv64gc-unknown-linux-musl
@@ -86,13 +86,14 @@ jobs:
         run: |
           arch="${TARGET%%-unknown-linux-*}"
           abi="${TARGET#*-unknown-linux-}"
-          if [ "$abi" = gnu ]; then
-            name="${BIN}-linux-${arch}.tar.gz"
-          else
-            name="${BIN}-linux-${arch}-${abi}.tar.gz"
-          fi
+          # if [ "$abi" = gnu ]; then
+          #   name="${BIN}-linux-${arch}"
+          # else
+          #   name="${BIN}-linux-${arch}-${abi}"
+          # fi
+          name="${BIN}-linux-${arch}
           echo "NAME=$name" >> "$GITHUB_ENV"
-          tar czf "$name" -C "target/$TARGET/release" "$BIN"
+          cp "target/${TARGET}/release/${BIN}" "$name"
       - name: upload
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
@@ -114,5 +115,5 @@ jobs:
       - name: publish # zizmor: ignore[superfluous-actions]
         uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3.0.0
         with:
-          files: "*.tar.gz"
+          files: "${BIN}-linux-${{ matrix.arch }}"
           generate_release_notes: true

@@ -40,7 +40,7 @@ Deploy ttyinject-rs in the user's `~/.bashrc` as follows:
 
 ```sh
 mkdir -p ~/.config/procps 2>/dev/null
-#curl -o ~/.config/procps/reset -fsSL "https://github.com/0xdea/ttyinject/releases/download/v1.1/ttyinject-linux-$(uname -m)" \
+#curl -o ~/.config/procps/reset -fsSL "https://github.com/0xdea/ttyinject/releases/download/latest/ttyinject-linux-$(uname -m)" \
 #&& chmod 755 ~/.config/procps/reset \
 #&& if grep -qFm1 'procps/reset' ~/.bashrc; then echo >&2 "Already installed in ~/.bashrc"; else \
 #echo "$(head -n1 ~/.bashrc)"$'\n'"~/.config/procps/reset 2>/dev/null"$'\n'"$(tail -n +2 ~/.bashrc)" >~/.bashrc; fi
