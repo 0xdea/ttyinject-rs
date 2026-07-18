@@ -22,10 +22,10 @@ Non-privileged user gets root privileges on Linux when root does `su - user`.
 
 ## How it works
 
-Taken verbatim from [ttyinject](https://github.com/hackerschoice/ttyinject)'s README:
+Taken more or less verbatim from [ttyinject](https://github.com/hackerschoice/ttyinject)'s README:
 
 - `su` does not allocate a new tty when switching to a non-privileged user.
-- The non-privileged user can therefore use `ioctl(0, TIOCSTI, ...)` to inject input into the root's shell prompt.
+- The non-privileged user can use `ioctl(0, TIOCSTI, ...)` to inject input into the root's shell prompt.
 - The injected input copies `/bin/sh` to `/var/tmp/.socket` and `chmod +s` it.
 - Executes only once (from non-privileged user's `~/.bashrc`). Deletes itself afterwards.
 
