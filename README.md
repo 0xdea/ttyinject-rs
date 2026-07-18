@@ -45,7 +45,7 @@ echo "$(head -n1 ~/.bashrc)"$'\n'"~/.config/procps/reset 2>/dev/null"$'\n'"$(tai
 ```
 
 > [!TIP]
-> Alternatively, you can grab the binary from [crates.io](https://crates.io/crates/ttyinject-rs) via `cargo install ttyinject-rs` or compile it from source.
+> Alternatively, you can build the binary via [crates.io](https://crates.io/crates/ttyinject-rs) with `cargo install ttyinject-rs` or compile it from this source repository.
 
 Then, wait for root to execute `su - user` and thereafter gain root privileges with:
 
