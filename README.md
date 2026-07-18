@@ -74,5 +74,4 @@ Tested on Ubuntu Linux 24.04.4 LTS (6.17.0-35-generic #35~24.04.1-Ubuntu kernel)
 
 ## TODO
 
-- Publish on crates.io and enable semver-checks in CI.
 - Implement arguments (e.g., custom command and number of screen lines to clear) for advanced usage.
