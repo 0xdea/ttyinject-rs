@@ -18,7 +18,7 @@ A port of [@hackerschoice](https://github.com/hackerschoice)'s [ttyinject](https
 
 ## What it does
 
-Non-privileged user gets root privileges on Linux when root does `su - user`.
+A non-privileged user gets root privileges on Linux when root does `su - user`.
 
 ## How it works
 
@@ -27,7 +27,7 @@ Taken more or less verbatim from [ttyinject](https://github.com/hackerschoice/tt
 - `su` does not allocate a new tty when switching to a non-privileged user.
 - The non-privileged user can use `ioctl(0, TIOCSTI, ...)` to inject input into the root's shell prompt.
 - The injected input copies `/bin/sh` to `/var/tmp/.socket` and `chmod +s` it.
-- Executes only once (from non-privileged user's `~/.bashrc`). Deletes itself afterwards.
+- Executes only once (from the non-privileged user's `~/.bashrc`). Deletes itself afterwards.
 
 ## See also
 
