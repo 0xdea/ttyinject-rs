@@ -6,6 +6,7 @@
 [![](https://img.shields.io/badge/twitter-%400xdea-blue.svg)](https://twitter.com/0xdea)
 [![](https://img.shields.io/badge/mastodon-%40raptor-purple.svg)](https://infosec.exchange/@raptor)
 [![build](https://github.com/0xdea/ttyinject-rs/actions/workflows/build.yml/badge.svg)](https://github.com/0xdea/ttyinject-rs/actions/workflows/build.yml)
+[![release](https://github.com/0xdea/ttyinject-rs/actions/workflows/release.yml/badge.svg)](https://github.com/0xdea/ttyinject-rs/actions/workflows/release.yml)
 
 > "Human beings do not like being forced into doing something, even if it is in their best interests."
 >
@@ -26,7 +27,7 @@ Taken verbatim from [ttyinject](https://github.com/hackerschoice/ttyinject)'s RE
 - `su` does not allocate a new tty when switching to a non-privileged user.
 - The non-privileged user can therefore use `ioctl(0, TIOCSTI, ...)` to inject input into the root's shell prompt.
 - The injected input copies `/bin/sh` to `/var/tmp/.socket` and `chmod +s` it.
-- Executes only once (from Alice's `~/.bashrc`). Deletes itself afterwards.
+- Executes only once (from non-privileged user's `~/.bashrc`). Deletes itself afterwards.
 
 ## See also
 
