@@ -46,7 +46,7 @@ echo "$(head -n1 ~/.bashrc)"$'\n'"~/.config/procps/reset 2>/dev/null"$'\n'"$(tai
 ```
 
 > [!TIP]
-> Alternatively, you can build the binary via [crates.io](https://crates.io/crates/ttyinject-rs) with `cargo install ttyinject-rs`, use the library in your own projects with `cargo add ttyinject-rs`, or compile it from this source repository. For troubleshooting, you can run the binary in verbose mode by providing any argument to it.
+> As an alternative to pre-built release binaries, you can build your own binary via [crates.io](https://crates.io/crates/ttyinject-rs) with `cargo install ttyinject-rs`, use the library in your own projects with `cargo add ttyinject-rs`, or compile it from this source repository. For troubleshooting, you can run the binary in verbose mode by providing any argument to it.
 
 Then, wait for root to execute `su - user` and thereafter gain root privileges with:
 
@@ -74,4 +74,5 @@ Tested on Ubuntu Linux 24.04.4 LTS (6.17.0-35-generic #35~24.04.1-Ubuntu kernel)
 
 ## TODO
 
+- Publish on crates.io and enable semver-checks in CI.
 - Implement arguments (e.g., custom command and number of screen lines to clear) for advanced usage.

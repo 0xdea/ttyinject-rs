@@ -72,7 +72,6 @@ pub fn run() -> anyhow::Result<()> {
         tiocsti_inject(STDIN_FILENO, b).context("failed to inject into tty")?;
     }
 
-    // TODO: publish on crates.io and enable semver checks in ci
     // TODO: final check of cargo doc --open
 
     // No need to SIGCONT here because `fg` at the end of the payload does that for us.
