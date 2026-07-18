@@ -45,7 +45,7 @@ echo "$(head -n1 ~/.bashrc)"$'\n'"~/.config/procps/reset 2>/dev/null"$'\n'"$(tai
 ```
 
 > [!TIP]
-> Alternatively, you can build the binary via [crates.io](https://crates.io/crates/ttyinject-rs) with `cargo install ttyinject-rs` or compile it from this source repository.
+> Alternatively, you can build the binary via [crates.io](https://crates.io/crates/ttyinject-rs) with `cargo install ttyinject-rs`, use the library in your own projects with `cargo add ttyinject-rs`, or compile it from this source repository. For troubleshooting, you can run the binary in verbose by providing any argument to it.
 
 Then, wait for root to execute `su - user` and thereafter gain root privileges with:
 
@@ -58,7 +58,7 @@ Then, wait for root to execute `su - user` and thereafter gain root privileges w
 
 ## Compatibility
 
-Tested on Ubuntu Linux 24.04.4 LTS (6.17.0-35-generic #35~24.04.1-Ubuntu kernel) with `dev.tty.legacy_tiocsti` explicitly enabled.
+Tested on Ubuntu Linux 24.04.4 LTS (6.17.0-35-generic #35~24.04.1-Ubuntu kernel) aarch64 with `dev.tty.legacy_tiocsti` explicitly enabled.
 
 > [!IMPORTANT]
 > Since Linux 6.2, `TIOCSTI` may require the `CAP_SYS_ADMIN` capability (if the `dev.tty.legacy_tiocsti` sysctl variable is set to `false`).

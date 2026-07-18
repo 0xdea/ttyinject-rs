@@ -72,7 +72,6 @@ pub fn run() -> anyhow::Result<()> {
         tiocsti_inject(STDIN_FILENO, b).context("failed to inject into tty")?;
     }
 
-    // TODO: update documentation to reflect changes (especially verbose/quiet mode) + how to add as a library to use in your own projects
     // TODO: publish on crates.io and enable semver checks in ci
     // TODO: final check of cargo doc --open
 
