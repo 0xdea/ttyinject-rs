@@ -25,15 +25,6 @@ exclude = [
 anyhow = "1.0"
 libc = "0.2"
 
-# [build-dependencies]
-
-# [dev-dependencies]
-
-# [[test]]
-# name = "tests"
-# path = "tests/main.rs"
-# harness = false
-
 [profile.release]
 strip = true
 lto = true
@@ -73,12 +64,3 @@ inline_modules = "allow"
 single_call_fn = "allow"
 separated_literal_suffix = "allow"
 default_numeric_fallback = "allow"
-# use_debug = "allow"
-# string_slice = "allow"
-# indexing_slicing = "allow"
-# doc_markdown = "allow"
-# missing_errors_doc = "allow"
-# multiple_crate_versions = "allow"
-# significant_drop_tightening = "allow"
-# wildcard_imports = "allow"
-# must_use_candidate = "allow"
