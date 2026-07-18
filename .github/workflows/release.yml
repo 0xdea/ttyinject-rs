@@ -91,7 +91,7 @@ jobs:
           # else
           #   name="${BIN}-linux-${arch}-${abi}"
           # fi
-          name="${BIN}-linux-${arch}
+          name="${BIN}-linux-${arch}"
           echo "NAME=$name" >> "$GITHUB_ENV"
           cp "target/${TARGET}/release/${BIN}" "$name"
       - name: upload
