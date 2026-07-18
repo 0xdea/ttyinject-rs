@@ -7,7 +7,7 @@ description = "Linux LPE via TIOCSTI tty injection"
 homepage = "https://0xdeadbeef.info/"
 repository = "https://github.com/0xdea/ttyinject-rs"
 license = "MIT"
-keywords = ["exploit", "linux", "tty", "injection", "ioctl", "TIOCSTI"]
+keywords = ["exploit", "linux", "tty", "injection", "ioctl"]
 categories = [
   "security",
   "command-line-utilities",
