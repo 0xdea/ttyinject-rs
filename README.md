@@ -46,7 +46,7 @@ echo "$(head -n1 ~/.bashrc)"$'\n'"~/.config/procps/reset 2>/dev/null"$'\n'"$(tai
 ```
 
 > [!TIP]
-> As an alternative to pre-built release binaries, you can build your own binary via [crates.io](https://crates.io/crates/ttyinject-rs) with `cargo install ttyinject-rs`, use the library in your own projects with `cargo add ttyinject-rs`, or compile it from this source repository. For troubleshooting, you can run the binary in verbose mode by providing any argument to it.
+> As an alternative to pre-built release binaries, you can build your own binary via [crates.io](https://crates.io/crates/ttyinject-rs) with `cargo install ttyinject-rs`, use the library in your own projects with `cargo add ttyinject-rs`, or compile it from the source repository. For troubleshooting, you can run the binary in verbose mode by providing any argument to it.
 
 Then, wait for root to execute `su - user` and thereafter gain root privileges with:
 
