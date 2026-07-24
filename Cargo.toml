@@ -1,6 +1,6 @@
 [package]
 name = "ttyinject-rs"
-version = "0.1.1"
+version = "0.1.2-alpha"
 authors = ["Marco Ivaldi <raptor@0xdeadbeef.info>"]
 edition = "2024"
 description = "Linux LPE via TIOCSTI tty injection."
