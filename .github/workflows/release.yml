@@ -70,7 +70,7 @@ jobs:
           target: ${{ matrix.target }}
           cache: false
       - name: dependencies
-        uses: taiki-e/install-action@07b4745e0c39a41822af610387492e3e53aa222b # v2.83.4
+        uses: taiki-e/install-action@18b1216eba7f8039b0f8d131d5473787f0edce68 # v2.85.3
         with:
           tool: cross
       - name: build
