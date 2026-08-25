@@ -148,23 +148,15 @@ pub fn clear_terminal(lines: u16) {
 
 /// Checks that stdin refers to a terminal, that we are not already root, and that we have a valid parent.
 fn check_preconditions(uid: uid_t, is_tty: bool, parent_pid: pid_t) -> anyhow::Result<()> {
-    if !is_tty {
-        anyhow::bail!("stdin does not refer to a terminal");
-    }
-    if uid == 0 {
-        anyhow::bail!("we are already root");
-    }
-    if parent_pid <= 1 {
-        anyhow::bail!("invalid parent process id");
-    }
+    anyhow::ensure!(is_tty, "stdin does not refer to a terminal");
+    anyhow::ensure!(uid != 0, "we are already root");
+    anyhow::ensure!(parent_pid > 1, "invalid parent process id");
     Ok(())
 }
 
 /// Checks that the tty does not have the same uid as us.
 fn check_tty_ownership(uid: uid_t, tty_uid: uid_t) -> anyhow::Result<()> {
-    if tty_uid == uid {
-        anyhow::bail!("tty has the same uid as us");
-    }
+    anyhow::ensure!(tty_uid != uid, "tty has the same uid as us");
     Ok(())
 }
 
