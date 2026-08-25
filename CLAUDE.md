@@ -23,7 +23,6 @@ cargo fmt --all --check                        # formatting check (CI runs this,
 cargo clippy --all-targets --locked -- -D warnings
 cargo doc --no-deps --locked                   # RUSTDOCFLAGS=-D warnings in CI
 cargo test --locked -- --nocapture
-cargo test <test_name>                         # run a single test by name (substring match)
 cargo audit                                    # requires cargo-audit installed
 cargo semver-checks                            # requires cargo-semver-checks installed
 ```

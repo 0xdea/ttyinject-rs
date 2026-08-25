@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Replace `anyhow::bail!` with `anyhow::ensure!` where possible.
+- Use the `--locked` flag for all suitable `cargo` commands.
 - Improve CI.
 - Update dependencies.
 
