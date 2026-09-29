@@ -1,4 +1,5 @@
-//! Integration tests driving the compiled `ttyinject-rs` binary end-to-end to exercise `run`'s guard checks.
+//! Integration tests driving the compiled `ttyinject-rs` binary end-to-end to
+//! exercise `run`'s guard checks.
 
 #![expect(clippy::expect_used, reason = "tests can use `expect`")]
 
@@ -15,7 +16,8 @@ mod tests {
 
     use super::BIN;
 
-    /// Asserts that `stderr` mentions `expected_message`, given verbose mode was enabled for the run.
+    /// Asserts that `stderr` mentions `expected_message`, given verbose mode was
+    /// enabled for the run.
     fn assert_stderr_contains(stderr: &str, expected_message: &str) {
         assert!(
             stderr.contains(expected_message),
@@ -45,8 +47,9 @@ mod tests {
         let mut master: c_int = 0;
         let mut slave: c_int = 0;
 
-        // SAFETY: `master` and `slave` are valid out-pointers to live `c_int` locals; the name, termios, and winsize
-        // out-parameters are optional per `openpty`'s contract and may be null.
+        // SAFETY: `master` and `slave` are valid out-pointers to live `c_int` locals;
+        // the name, termios, and winsize out-parameters are optional per `openpty`'s
+        // contract and may be null.
         let openpty_ret = unsafe {
             openpty(
                 &raw mut master,
@@ -63,20 +66,22 @@ mod tests {
             io::Error::last_os_error()
         );
 
-        // SAFETY: `slave` is a valid, open pty fd from `openpty` above; ownership moves into `OwnedFd`, so it is
-        // closed exactly once, when `Stdio::from` hands it to the child below.
+        // SAFETY: `slave` is a valid, open pty fd from `openpty` above; ownership moves
+        // into `OwnedFd`, so it is closed exactly once, when `Stdio::from` hands it to
+        // the child below.
         let slave_fd = unsafe { OwnedFd::from_raw_fd(slave) };
 
-        // The child only needs the slave as its stdin: it never has to become this pty's session leader, because the
-        // ownership check just stats whatever `/proc/self/fd/0` resolves to, and `is_terminal()` accepts any pty
-        // slave.
+        // The child only needs the slave as its stdin: it never has to become this
+        // pty's session leader, because the ownership check just stats whatever
+        // `/proc/self/fd/0` resolves to, and `is_terminal()` accepts any pty slave.
         let output = Command::new(BIN)
             .arg("-v")
             .stdin(Stdio::from(slave_fd))
             .output()
             .expect("failed to spawn the binary under test");
 
-        // SAFETY: `master` is a valid, open file descriptor from `openpty` above, closed exactly once here.
+        // SAFETY: `master` is a valid, open file descriptor from `openpty` above,
+        // closed exactly once here.
         unsafe {
             close(master);
         };
