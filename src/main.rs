@@ -1,4 +1,4 @@
-//! main.rs.
+//! Command-line entry point for `ttyinject-rs`.
 
 use std::env;
 use std::process::ExitCode;
