@@ -21,6 +21,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Align lint allowlist with my other projects.
 - Update dependencies.
 
+### Fixed
+
+- Fall back to uncached builds in CI when sccache fails to start.
+
 ## [0.1.1] - 2026-07-19
 
 ### Changed
