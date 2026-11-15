@@ -166,8 +166,6 @@ fn check_tty_ownership(uid: uid_t, tty_uid: uid_t) -> anyhow::Result<()> {
     Ok(())
 }
 
-#[expect(clippy::expect_used, reason = "tests can use `expect`")]
-#[expect(clippy::panic, reason = "tests can use `panic`")]
 #[cfg(test)]
 mod tests {
     use std::ffi::CString;

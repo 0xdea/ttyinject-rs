@@ -1,8 +1,6 @@
 //! Integration tests driving the compiled `ttyinject-rs` binary end-to-end to
 //! exercise `run`'s guard checks.
 
-#![expect(clippy::expect_used, reason = "tests can use `expect`")]
-
 /// Absolute path to the compiled `ttyinject-rs` binary under test.
 const BIN: &str = env!("CARGO_BIN_EXE_ttyinject-rs");
 
