@@ -70,7 +70,7 @@ jobs:
           target: ${{ matrix.target }}
           cache: false
       - name: dependencies
-        uses: taiki-e/install-action@b80e2bb2635f28eb98b9fce1e2f0887e1535c6b2 # v2.90.0
+        uses: taiki-e/install-action@c509219cf42fba86913069efd0ade2458c59337b # v2.90.1
         with:
           tool: cross
       - name: build
@@ -113,7 +113,7 @@ jobs:
         with:
           merge-multiple: true
       - name: publish # zizmor: ignore[superfluous-actions]
-        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
+        uses: softprops/action-gh-release@8a0cd651e5b2365bd640854a3fa5dfc70e4875f3 # v3.0.4
         with:
           files: "${{ env.BIN }}-linux-*"
           generate_release_notes: true
