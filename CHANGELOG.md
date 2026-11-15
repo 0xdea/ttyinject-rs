@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improve CI.
 - Align lint allowlist with my other projects.
 - Update dependencies.
+- Enable Cargo lints and fail CI on their warnings.
 
 ### Fixed
 
