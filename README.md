@@ -5,6 +5,7 @@
 [![](https://img.shields.io/crates/d/ttyinject-rs?style=flat&color=red)](https://crates.io/crates/ttyinject-rs)
 [![](https://img.shields.io/badge/mastodon-%40raptor-blue.svg)](https://infosec.exchange/@raptor)
 [![build](https://github.com/0xdea/ttyinject-rs/actions/workflows/build.yml/badge.svg)](https://github.com/0xdea/ttyinject-rs/actions/workflows/build.yml)
+[![doc](https://img.shields.io/docsrs/ttyinject-rs)](https://docs.rs/ttyinject-rs)
 [![release](https://github.com/0xdea/ttyinject-rs/actions/workflows/release.yml/badge.svg)](https://github.com/0xdea/ttyinject-rs/actions/workflows/release.yml)
 
 > "Human beings do not like being forced into doing something, even if it is in their best interests."
